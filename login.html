@@ -2,38 +2,49 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Cervejaria e Petiscaria Mandela</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Cervejaria e Petiscaria Mandela</title>
 </head>
 
 <body>
-    <div class="login-container">
-        <button class="btn-topo-esquerda" onclick="window.location.href='index.html'">Voltar</button>
+  <div class="login-container">
+    <button class="btn-topo-esquerda" onclick="window.location.href='index.html'">Voltar</button>
 
-        <div class="login-box">
-            <form id="loginForm">
-                <label for="usuario">Usuário:</label>
-                <input type="text" id="usuario" name="usuario" placeholder="Usuário" required>
+    <div class="login-box">
+      <form id="loginForm">
+        <label for="usuario">Usuário:</label>
+        <input type="text" id="usuario" name="usuario" placeholder="Usuário" required>
 
-                <label for="senha">Senha:</label>
-                <input type="password" id="senha" name="senha" placeholder="Senha" required>
+        <label for="senha">Senha:</label>
+        <input type="password" id="senha" name="senha" placeholder="Senha" required>
 
-                <label for="tipo">Entrar como:</label>
-                <select id="tipo" name="tipo" required>
-                    <option value="">Selecione...</option>
-                    <option value="garcom">Garçom</option>
-                    <option value="caixa">Caixa</option>
-                </select>
+        <label for="tipo">Entrar como:</label>
+        <select id="tipo" name="tipo" required>
+          <option value="">Selecione...</option>
+          <option value="admin">Administrador</option>
+          <option value="cliente">Cliente</option>
+          <option value="garcom">Garçom</option>
+          <option value="caixa">Caixa</option>
+        </select>
 
-                <br>
-                <button type="submit">Entrar</button>
-            </form>
-        </div>
+        <br>
+        <button type="submit">Entrar</button>
+      </form>
+
+      <!-- Botão de cadastrar usuário (só aparece para admin) -->
+      <button id="btnCadastrar" style="display:none; margin-top:15px;" onclick="cadastrarUsuario()">Cadastrar Usuário</button>
     </div>
+  </div>
 
-    <script src="script.js"></script>
+  <script src="script.js"></script>
+  <script>
+    // Exibe botão "Cadastrar Usuário" somente para admin
+    if (sessionStorage.getItem("tipoLogado") === "admin") {
+      document.getElementById("btnCadastrar").style.display = "block";
+    }
+  </script>
 </body>
 
 </html>
