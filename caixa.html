@@ -4,38 +4,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cervejaria e Petiscaria Mandela</title>
+  <title>Caixa Profissional - Cervejaria Mandela</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
+  <header class="topo">
+    <img src="/logo do bar 1.jpg" alt="Logo Cervejaria e Petiscaria Mandela" class="logo-principal">
 
-  <!-- Logo principal -->
-  <header class="topomesa">
-    <img src="logo do bar 1.jpg" alt="Logo Cervejaria e Petiscaria Mandela" class="logo-principal">
   </header>
- <div class="containermesa">
-    <!-- Botões de navegação -->
-    <nav class="caixa">
+
+  <div class="containermesa">
+    <nav class="garçom">
       <button onclick="window.location.href='index.html'">Caixa</button>
     </nav>
-      
+
+    
   </div>
-  <button id="verFinalizados">Ver Pedidos Finalizados</button>
-<div id="historicoFinalizados"></div>
-  <div class="caixa-container">
-   <h2>Pedidos no Caixa</h2>
-   <div id="mesasContainer"></div>
+  <h1>Caixa Profissional</h1>
+
+  <div class="mesas-grid" id="mesasContainer"></div>
+
+  <button class="historico-btn" onclick="mostrarHistorico()">Ver Histórico</button>
+  <div id="historicoContainer"></div>
+
+  <!-- Modal de pedidos -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal">
+      <h2 id="modalTitulo"></h2>
+      <ul id="modalPedidos"></ul>
+      <button class="cancelar" onclick="cancelarMesaModal()">Cancelar Mesa</button>
+      <button class="fechar" onclick="fecharMesaModal()">Fechar Mesa</button>
+      <button onclick="fecharModal()">Fechar</button>
+    </div>
   </div>
 
-
-
-  <!-- Logo secundário -->
-  <footer class="rodapemesa">
-    <img src="mandelanovo.png" alt="Logo Mandela pequeno">
-  </footer>
- <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 
 </html>
