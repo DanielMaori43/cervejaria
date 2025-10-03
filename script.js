@@ -690,8 +690,11 @@ async function imprimirHistorico(mesa, dataHora) {
     const res = await fetch("https://cervejaria-sk59.onrender.com/historico");
     const historico = await res.json();
 
-    // Filtro pelo mesmo valor ISO string
-    const pedidosMesa = historico.filter(p => String(p.mesa) === String(mesa) && String(p.dataHora) === String(dataHora));
+    // Filtra pelo mesmo valor ISO string (sem milissegundos)
+    const pedidosMesa = historico.filter(
+      p => String(p.mesa) === String(mesa) && p.dataHora.slice(0,19) === dataHora.slice(0,19)
+    );
+
     if (pedidosMesa.length === 0) return alert("Pedido não encontrado no histórico.");
 
     const { jsPDF } = window.jspdf;
@@ -739,7 +742,13 @@ async function imprimirHistorico(mesa, dataHora) {
     });
 
     // Total
-    const total = pedidosMesa.reduce((acc, p) => acc + (Number(p.subtotal) || (Number(p.quantidade) || 0) * (Number(p.valor) || 0)), 0);
+    const total = pedidosMesa.reduce((acc, p) => {
+      const qtd = Number(p.quantidade) || 0;
+      const val = Number(p.valor) || 0;
+      const sub = Number(p.subtotal) || qtd * val;
+      return acc + sub;
+    }, 0);
+
     if (y + linhaAltura > doc.internal.pageSize.height) doc.addPage();
     doc.text('----------------------------', 10, y); y += linhaAltura;
     doc.setFontSize(14);
@@ -759,6 +768,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
 
