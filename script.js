@@ -606,17 +606,6 @@ async function fecharMesaModal() {
 
 
 
-
-    // Atualiza frontend
-    fecharModal();
-    await renderMesas();
-  } catch (err) {
-    console.error("Erro ao salvar histórico ou limpar pedidos:", err);
-    
-  }
-})();
-
-
 // ===== Histórico =====
 async function mostrarHistorico() {
   const container = document.getElementById('historicoContainer');
@@ -756,6 +745,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
 
