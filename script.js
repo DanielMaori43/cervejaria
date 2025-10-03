@@ -610,8 +610,6 @@ async function fecharMesaModal() {
   }
 }
 
-// Depois, chame assim:
-await deletarPedidosAtivos(mesaPedidos);
 
 
     // Atualiza frontend
@@ -763,6 +761,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
 
