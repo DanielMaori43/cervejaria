@@ -77,7 +77,20 @@ app.delete("/pedidos/mesa/:mesa", async (req, res) => {
         res.status(500).json({ error: "Erro ao remover pedidos da mesa" });
     }
 });
-
+// ===== Excluir pedido individual =====
+app.delete("/pedidos/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query("DELETE FROM pedidos WHERE id = $1", [id]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: "Pedido não encontrado" });
+        }
+        res.json({ message: "Pedido removido com sucesso!" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erro ao remover pedido" });
+    }
+});
 // ===== Histórico =====
 app.get("/historico", async (req, res) => {
     try {
@@ -111,3 +124,4 @@ app.post("/historico", async (req, res) => {
 app.listen(3000, () => {
     console.log("API rodando em http://localhost:3000");
 });
+
