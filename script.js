@@ -501,8 +501,8 @@ async function fecharMesaModal() {
     return alert('Não há pedidos nesta mesa.');
   }
 
-  // Define data/hora atual
-  const dataHora = new Date().toLocaleString();
+  // Usa ISO string para salvar
+  const dataHora = new Date().toISOString().slice(0,19); // YYYY-MM-DDTHH:MM:SS
 
   // ===== Salva histórico no backend =====
   try {
@@ -513,7 +513,6 @@ async function fecharMesaModal() {
     });
   } catch (err) {
     console.error("Erro ao salvar histórico:", err);
-
     return;
   }
 
@@ -543,7 +542,7 @@ async function fecharMesaModal() {
   doc.text('Cervejaria Mandela', 81, y, { align: 'center' }); y += linhaAltura;
   doc.setFontSize(10);
   doc.text(`Mesa ${mesaAtual}`, 81, y, { align: 'center' }); y += linhaAltura;
-  doc.text(dataHora, 81, y, { align: 'center' }); y += linhaAltura;
+  doc.text(new Date(dataHora).toLocaleString(), 81, y, { align: 'center' }); y += linhaAltura;
   doc.text('-------------------------------', 81, y, { align: 'center' }); y += linhaAltura;
 
   // Títulos da tabela
@@ -580,7 +579,13 @@ async function fecharMesaModal() {
   });
 
   // Total
-  const total = mesaPedidos.reduce((acc, p) => acc + (Number(p.subtotal) || qtd * val), 0);
+  const total = mesaPedidos.reduce((acc, p) => {
+    const qtd = Number(p.quantidade) || 0;
+    const val = Number(p.valor) || 0;
+    const sub = Number(p.subtotal) || qtd * val;
+    return acc + sub;
+  }, 0);
+
   doc.text('-------------------------------', 81, y, { align: 'center' }); y += linhaAltura;
   doc.setFontSize(12);
   doc.text(`TOTAL: R$${total.toFixed(2)}`, 150, y, { align: 'right' }); y += linhaAltura * 2;
@@ -588,7 +593,7 @@ async function fecharMesaModal() {
   // Rodapé
   doc.setFontSize(10);
   doc.text('Obrigado pela preferência!', 81, y, { align: 'center' }); y += linhaAltura;
-  doc.text('Volte Sempre!', 81, y, { align: 'center' });
+  doc.text('Volte Sempre!', 81, y);
 
   // Abre PDF
   window.open(doc.output('bloburl'));
@@ -597,6 +602,7 @@ async function fecharMesaModal() {
   fecharModal();
   await renderMesas();
 }
+
 
 // ===== Histórico (backend) =====
 (async () => {
@@ -753,5 +759,6 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
