@@ -604,10 +604,15 @@ async function fecharMesaModal() {
 }
 
 
-    // Deleta pedidos ativos no backend
-    for (const p of mesaPedidos) {
-      await fetch(`https://cervejaria-sk59.onrender.com/pedidos/${p.id}`, { method: "DELETE" });
-    }
+   async function deletarPedidosAtivos(mesaPedidos) {
+  for (const p of mesaPedidos) {
+    await fetch(`https://cervejaria-sk59.onrender.com/pedidos/${p.id}`, { method: "DELETE" });
+  }
+}
+
+// Depois, chame assim:
+await deletarPedidosAtivos(mesaPedidos);
+
 
     // Atualiza frontend
     fecharModal();
@@ -758,6 +763,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
 
