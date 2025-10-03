@@ -517,13 +517,12 @@ async function fecharMesaModal() {
   }
 
   // ===== Deleta pedidos ativos no backend =====
-  for (const p of mesaPedidos) {
-    try {
-      await deletePedido(p.id);
-    } catch (err) {
-      console.error("Erro ao deletar pedido:", err);
-    }
-  }
+ try {
+  await Promise.all(mesaPedidos.map(p => deletePedido(p.id)));
+} catch (err) {
+  console.error("Erro ao deletar pedidos:", err);
+}
+
   
 
   // ===== Gera PDF =====
@@ -745,6 +744,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
 
