@@ -1,20 +1,15 @@
 // ====== main.js ======
 
-// ===== Usuários pré-definidos =====
-const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [{ usuario: "admin", senha: "1234", tipo: "admin" }]
-
-localStorage.setItem("usuarios", JSON.stringify(usuarios))
-
 // ===== Login Automático Padrão (Cliente Visitante) =====
 if (!sessionStorage.getItem("usuarioLogado")) {
-  sessionStorage.setItem("usuarioLogado", "Visitante")
-  sessionStorage.setItem("tipoLogado", "cliente")
+  sessionStorage.setItem("usuarioLogado", "Visitante");
+  sessionStorage.setItem("tipoLogado", "cliente");
 }
 
 // ===== Login =====
 if (document.getElementById("loginForm")) {
   const form = document.getElementById("loginForm");
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => { // <<< async aqui
     e.preventDefault();
 
     const usuario = document.getElementById("usuario").value.trim();
@@ -43,63 +38,75 @@ if (document.getElementById("loginForm")) {
     }
 
     // ===== Caso admin ou outros usuários precisem de senha =====
-    const usuariosSalvos = JSON.parse(localStorage.getItem("usuarios")) || [];
-    const user = usuariosSalvos.find(
-      (u) => u.usuario === usuario && u.senha === senha && u.tipo === tipo
-    );
+    try {
+      const response = await fetch("http://localhost:3000/usuarios");
+      const usuarios = await response.json();
+      const user = usuarios.find(
+        (u) => u.usuario === usuario && u.senha === senha && u.tipo === tipo
+      );
 
-    if (!user) {
-      alert("Usuário ou senha incorretos!");
-      return;
+      if (!user) {
+        alert("Usuário ou senha incorretos!");
+        return;
+      }
+
+      sessionStorage.setItem("usuarioLogado", user.usuario);
+      sessionStorage.setItem("tipoLogado", user.tipo);
+      window.location.href = "index.html";
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao conectar com o servidor.");
     }
-
-    sessionStorage.setItem("usuarioLogado", user.usuario);
-    sessionStorage.setItem("tipoLogado", user.tipo);
-    window.location.href = "index.html";
   });
 }
 
-
 // ===== Cadastro de Usuário =====
-function cadastrarUsuario() {
-  const logado = sessionStorage.getItem("tipoLogado")
+async function cadastrarUsuario() { // <<< async aqui
+  const logado = sessionStorage.getItem("tipoLogado");
   if (logado !== "admin") {
-    alert("Apenas administradores podem cadastrar usuários!")
-    return
+    alert("Apenas administradores podem cadastrar usuários!");
+    return;
   }
 
-  const novoUsuario = prompt("Digite o nome de usuário:")
-  const novaSenha = prompt("Digite a senha:")
-  const opcao = confirm("Clique em OK para cadastrar como GARÇOM.\nClique em CANCELAR para cadastrar como CAIXA.")
-  const novoTipo = opcao ? "garcom" : "caixa"
+  const novoUsuario = prompt("Digite o nome de usuário:");
+  const novaSenha = prompt("Digite a senha:");
+  const opcao = confirm("Clique em OK para cadastrar como GARÇOM.\nClique em CANCELAR para cadastrar como CAIXA.");
+  const novoTipo = opcao ? "garcom" : "caixa";
 
   if (!novoUsuario || !novaSenha) {
-    alert("Todos os campos são obrigatórios!")
-    return
+    alert("Todos os campos são obrigatórios!");
+    return;
   }
 
-  const usuariosSalvos = JSON.parse(localStorage.getItem("usuarios")) || []
-  usuariosSalvos.push({ usuario: novoUsuario, senha: novaSenha, tipo: novoTipo })
-  localStorage.setItem("usuarios", JSON.stringify(usuariosSalvos))
-
-  alert(`Usuário ${novoUsuario} (${novoTipo.toUpperCase()}) cadastrado com sucesso!`)
+  try {
+    await fetch("http://localhost:3000/usuarios", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usuario: novoUsuario, senha: novaSenha, tipo: novoTipo })
+    });
+    alert(`Usuário ${novoUsuario} (${novoTipo.toUpperCase()}) cadastrado com sucesso!`);
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao cadastrar usuário.");
+  }
 }
 
 // ===== Exibe usuário logado =====
-const usuarioLogadoElement = document.getElementById("usuarioLogado")
+const usuarioLogadoElement = document.getElementById("usuarioLogado");
 if (usuarioLogadoElement) {
-  const usuario = sessionStorage.getItem("usuarioLogado")
-  const tipo = sessionStorage.getItem("tipoLogado")
+  const usuario = sessionStorage.getItem("usuarioLogado");
+  const tipo = sessionStorage.getItem("tipoLogado");
 
   if (usuario && tipo) {
-    usuarioLogadoElement.textContent = " " + tipo.toUpperCase() + " Logado: " + usuario
+    usuarioLogadoElement.textContent = " " + tipo.toUpperCase() + " Logado: " + usuario;
   } else {
-    usuarioLogadoElement.textContent = "Nenhum usuário logado"
+    usuarioLogadoElement.textContent = "Nenhum usuário logado";
   }
 }
 
+
 // ===== Garçom - Controle de Status (VERSÃO LIMPA) =====
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const container = document.querySelector(".garcomdisponivel")
   if (!container) return
 
@@ -107,7 +114,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const tipoLogado = (sessionStorage.getItem("tipoLogado") || "").toLowerCase()
   const statusGarcons = JSON.parse(localStorage.getItem("statusGarcons")) || {}
-  const usuarios = JSON.parse(localStorage.getItem("usuarios")) || []
+
+  // ===== BUSCA USUÁRIOS DO BANCO =====
+  let usuarios = []
+  try {
+    const response = await fetch("http://localhost:3000/usuarios")
+    usuarios = await response.json()
+  } catch (err) {
+    console.error("Erro ao buscar usuários:", err)
+  }
+
   const garcons = usuarios.filter((u) => u.tipo === "garcom")
 
   // Limpa completamente
@@ -221,63 +237,52 @@ document.addEventListener("DOMContentLoaded", () => {
   })
 })
 
-
-
-// ===== Index =====
-if (document.querySelector(".topo")) {
-  const usuarioLogado = sessionStorage.getItem("usuarioLogado")
-  const tipoLogado = sessionStorage.getItem("tipoLogado")
-  if (usuarioLogado) {
-    console.log("Usuário logado:", usuarioLogado, "Tipo:", tipoLogado)
-  }
-}
-// Abre pedidos de uma mesa
-function abrirMesa(numeroMesa) {
-  const detalhes = document.getElementById("detalhesMesa");
-  const titulo = document.getElementById("tituloMesa");
-  titulo.textContent = "Pedidos da Mesa " + numeroMesa;
-
-  renderMesa(numeroMesa);
-
-  detalhes.style.display = "block";
-  window.scrollTo({ top: detalhes.offsetTop - 50, behavior: "smooth" });
-}
-
-// Renderiza pedidos de uma mesa
-function renderMesa(numeroMesa) {
+// Renderiza pedidos de uma mesa (buscando do servidor)
+async function renderMesa(numeroMesa) {
   const container = document.getElementById("pedidosMesa");
   if (!container) return;
 
-  const pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
-  const pedidosMesa = pedidos.filter(p => p.mesa === String(numeroMesa));
+  try {
+    // Busca todos os pedidos do servidor
+    const response = await fetch("http://localhost:3000/pedidos");
+    if (!response.ok) throw new Error("Erro ao buscar pedidos do servidor");
+    const pedidos = await response.json();
 
-  if (pedidosMesa.length === 0) {
-    container.innerHTML = "<p>Nenhum pedido nesta mesa ainda.</p>";
-    return;
+    // Filtra apenas os pedidos da mesa selecionada
+    const pedidosMesa = pedidos.filter(p => String(p.mesa) === String(numeroMesa));
+
+    if (pedidosMesa.length === 0) {
+      container.innerHTML = "<p>Nenhum pedido nesta mesa ainda.</p>";
+      return;
+    }
+
+    let html = "<ul>";
+    pedidosMesa.forEach(p => {
+      html += `
+        <li>
+          ${p.quantidade}x ${p.item} - R$${p.valor}
+          = <strong>R$${p.subtotal.toFixed(2)}</strong>
+          ${p.obs ? `<em>(${p.obs})</em>` : ""}
+        </li>
+      `;
+    });
+    html += "</ul>";
+
+    const total = pedidosMesa.reduce((s, p) => s + (p.subtotal || 0), 0);
+    html += `<p><strong>Total: R$${total.toFixed(2)}</strong></p>`;
+
+    container.innerHTML = html;
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "<p>Erro ao carregar pedidos.</p>";
   }
-
-  let html = "<ul>";
-  pedidosMesa.forEach(p => {
-    html += `
-          <li>
-            ${p.quantidade}x ${p.item} - R$${p.valor}
-            = <strong>R$${p.subtotal.toFixed(2)}</strong>
-            ${p.obs ? `<em>(${p.obs})</em>` : ""}
-          </li>
-        `;
-  });
-  html += "</ul>";
-
-  const total = pedidosMesa.reduce((s, p) => s + (p.subtotal || 0), 0);
-  html += `<p><strong>Total: R$${total.toFixed(2)}</strong></p>`;
-
-  container.innerHTML = html;
 }
+
 
 // ===== Pedidos =====
 const formPedido = document.getElementById("formPedido")
 if (formPedido) {
-  formPedido.addEventListener("submit", (e) => {
+  formPedido.addEventListener("submit", async (e) => {
     e.preventDefault()
 
     const mesa = document.getElementById("mesa").value
@@ -287,24 +292,45 @@ if (formPedido) {
     const obs = document.getElementById("obs").value
     const subtotal = quantidade * valor
 
-    const pedido = { mesa, item, quantidade, valor, subtotal, obs, status: "em-andamento" }
+    const pedido = { mesa, item, quantidade, valor, subtotal, obs } // status removido
 
-    const pedidos = JSON.parse(localStorage.getItem("pedidos")) || []
-    pedidos.push(pedido)
-    localStorage.setItem("pedidos", JSON.stringify(pedidos))
+    try {
+      const response = await fetch("http://localhost:3000/pedidos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pedido)
+      });
 
-    alert(`Pedido da mesa ${mesa} adicionado com sucesso!`)
-    formPedido.reset()
+      if (!response.ok) {
+        throw new Error("Erro ao salvar pedido")
+      }
+
+      alert(`Pedido da mesa ${mesa} adicionado com sucesso!`)
+      formPedido.reset()
+    } catch (err) {
+      console.error(err)
+      alert("❌ Falha ao enviar o pedido para o servidor.")
+    }
   })
 }
 
 // ===== Caixa =====
-function renderCaixa() {
+async function renderCaixa() {
   const mesasContainer = document.getElementById("mesasContainer")
   if (!mesasContainer) return
 
   mesasContainer.innerHTML = ""
-  const pedidos = JSON.parse(localStorage.getItem("pedidos")) || []
+
+  // Pega os pedidos do backend
+  let pedidos = []
+  try {
+    const res = await fetch("http://localhost:3000/pedidos")
+    pedidos = await res.json()
+  } catch (err) {
+    console.error("Erro ao buscar pedidos:", err)
+    pedidos = [] // fallback
+  }
+
   const mesas = {}
 
   pedidos.forEach((p) => {
@@ -325,16 +351,16 @@ function renderCaixa() {
       <h3>Mesa ${mesa}</h3>
       <ul>
         ${mesas[mesa].itens
-        .map(
-          (i) => `
+          .map(
+            (i) => `
           <li>
             ${i.item} ${i.quantidade}x - R$${i.valor}
             = <strong>R$${i.subtotal.toFixed(2)}</strong>
             ${i.obs ? `<em>(${i.obs})</em>` : ""}
           </li>
         `,
-        )
-        .join("")}
+          )
+          .join("")}
       </ul>
       <p><strong>Total: R$${mesas[mesa].total.toFixed(2)}</strong></p>
     `
@@ -342,13 +368,46 @@ function renderCaixa() {
   }
 }
 
-let mesaAtual = null;
+let mesaAtual = null
 
-// Renderiza todas as mesas
-function renderMesas() {
+
+// ===== API helper =====
+async function getPedidos() {
+  try {
+    const res = await fetch("http://localhost:3000/pedidos");
+    return await res.json();
+  } catch (err) {
+    console.error("Erro ao buscar pedidos:", err);
+    return [];
+  }
+}
+
+async function deletePedido(id) {
+  try {
+    await fetch(`http://localhost:3000/pedidos/${id}`, { method: 'DELETE' });
+  } catch (err) {
+    console.error("Erro ao deletar pedido:", err);
+  }
+}
+
+async function salvarHistorico(mesa, pedidos) {
+  try {
+    await fetch("http://localhost:3000/historico", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mesa, pedidos, dataHora: new Date().toISOString() })
+    });
+  } catch (err) {
+    console.error("Erro ao salvar histórico:", err);
+  }
+}
+
+// ===== Renderiza todas as mesas =====
+async function renderMesas() {
   const container = document.getElementById('mesasContainer');
-  const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+  if (!container) return;
 
+  const pedidos = await getPedidos();
   const mesas = {};
   pedidos.forEach(p => {
     if (!mesas[p.mesa]) mesas[p.mesa] = [];
@@ -367,15 +426,15 @@ function renderMesas() {
   }
 }
 
-// Modal da mesa
-function abrirModalMesa(mesaNum) {
+// ===== Modal da mesa =====
+async function abrirModalMesa(mesaNum) {
   mesaAtual = mesaNum;
   const modal = document.getElementById('modalOverlay');
   const titulo = document.getElementById('modalTitulo');
   const lista = document.getElementById('modalPedidos');
 
   titulo.textContent = `Pedidos Mesa ${mesaNum}`;
-  const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
+  const pedidos = await getPedidos();
   const mesaPedidos = pedidos.filter(p => String(p.mesa) === String(mesaNum));
 
   lista.innerHTML = '';
@@ -387,7 +446,11 @@ function abrirModalMesa(mesaNum) {
       const val = Number(p.valor) || 0;
       const sub = Number(p.subtotal) || qtd * val;
       const li = document.createElement('li');
-      li.innerHTML = `${qtd}x ${p.item || 'Item não informado'} - R$${val.toFixed(2)} = R$${sub.toFixed(2)}${p.obs ? ` (${p.obs})` : ''} <button class="cancelar" onclick="cancelarPedidoModal(${index})">Cancelar</button>`;
+      li.innerHTML = `
+        ${qtd}x ${p.item || 'Item não informado'} - R$${val.toFixed(2)} = R$${sub.toFixed(2)}
+        ${p.obs ? ` (${p.obs})` : ''}
+        <button class="cancelar" onclick="cancelarPedidoModal('${p.id}')">Cancelar</button>
+      `;
       lista.appendChild(li);
     });
   }
@@ -395,58 +458,87 @@ function abrirModalMesa(mesaNum) {
   modal.style.display = 'flex';
 }
 
-// Fechar modal
-function fecharModal() { mesaAtual = null; document.getElementById('modalOverlay').style.display = 'none'; }
-
-// Cancelar pedido individual
-function cancelarPedidoModal(index) {
-  if (!mesaAtual) return;
-  let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-  const mesaPedidos = pedidos.filter(p => String(p.mesa) === String(mesaAtual));
-  const pedido = mesaPedidos[index];
-  if (!pedido) return;
-  if (!confirm(`Deseja cancelar o pedido "${pedido.item}"?`)) return;
-
-  const globalIndex = pedidos.findIndex(p => p === pedido);
-  if (globalIndex >= 0) pedidos.splice(globalIndex, 1);
-  localStorage.setItem('pedidos', JSON.stringify(pedidos));
-  abrirModalMesa(mesaAtual);
-  renderMesas();
+// ===== Fechar modal =====
+function fecharModal() {
+  mesaAtual = null;
+  document.getElementById('modalOverlay').style.display = 'none';
 }
 
-// Cancelar toda a mesa
-function cancelarMesaModal() {
+// ===== Cancelar pedido individual =====
+async function cancelarPedidoModal(pedidoId) {
+  if (!mesaAtual) return;
+  if (!confirm("Deseja cancelar este pedido?")) return;
+
+  await deletePedido(pedidoId);
+  await abrirModalMesa(mesaAtual);
+  await renderMesas();
+}
+
+// ===== Cancelar toda a mesa =====
+async function cancelarMesaModal() {
   if (!mesaAtual) return;
   if (!confirm(`Deseja cancelar todos os pedidos da mesa ${mesaAtual}?`)) return;
 
-  let pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-  pedidos = pedidos.filter(p => String(p.mesa) !== String(mesaAtual));
-  localStorage.setItem('pedidos', JSON.stringify(pedidos));
+  const pedidos = await getPedidos();
+  const mesaPedidos = pedidos.filter(p => String(p.mesa) === String(mesaAtual));
+
+  for (const p of mesaPedidos) {
+    await deletePedido(p.id);
+  }
+
   fecharModal();
-  renderMesas();
+  await renderMesas();
 }
 
-// Fechar mesa e gerar PDF
-function fecharMesaModal() {
+// ===== Fechar mesa e gerar PDF =====
+async function fecharMesaModal() {
   if (!mesaAtual) return;
-  const pedidos = JSON.parse(localStorage.getItem('pedidos')) || [];
-  const mesaPedidos = pedidos.filter(p => String(p.mesa) === String(mesaAtual));
-  if (mesaPedidos.length === 0) return alert('Não há pedidos nesta mesa.');
 
+  const pedidos = await getPedidos();
+  const mesaPedidos = pedidos.filter(p => String(p.mesa) === String(mesaAtual));
+
+  if (mesaPedidos.length === 0) {
+    return alert('Não há pedidos nesta mesa.');
+  }
+
+  // Define data/hora atual
+  const dataHora = new Date().toLocaleString();
+
+  // ===== Salva histórico no backend =====
+  try {
+    await fetch("http://localhost:3000/historico", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mesa: mesaAtual, pedidos: mesaPedidos, dataHora })
+    });
+  } catch (err) {
+    console.error("Erro ao salvar histórico:", err);
+    alert("❌ Ocorreu um erro ao salvar histórico no servidor.");
+    return;
+  }
+
+  // ===== Deleta pedidos ativos no backend =====
+  for (const p of mesaPedidos) {
+    try {
+      await deletePedido(p.id);
+    } catch (err) {
+      console.error("Erro ao deletar pedido:", err);
+    }
+  }
+
+  // ===== Gera PDF =====
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'pt',
-    format: [163, 300] // largura ~80mm, altura ajustável
+    format: [163, 300]
   });
 
   doc.setFont('Courier', 'normal');
   let y = 20;
-  const dataHora = new Date().toLocaleString();
-  const total = mesaPedidos.reduce((acc, p) => acc + (Number(p.subtotal) || (Number(p.quantidade) || 0) * (Number(p.valor) || 0)), 0);
   const linhaAltura = 14;
 
-  // ===== Cabeçalho =====
+  // Cabeçalho
   doc.setFontSize(12);
   doc.text('Cervejaria Mandela', 81, y, { align: 'center' }); y += linhaAltura;
   doc.setFontSize(10);
@@ -454,15 +546,15 @@ function fecharMesaModal() {
   doc.text(dataHora, 81, y, { align: 'center' }); y += linhaAltura;
   doc.text('-------------------------------', 81, y, { align: 'center' }); y += linhaAltura;
 
-  // ===== Títulos da Tabela =====
+  // Títulos da tabela
   doc.setFontSize(10);
   doc.text("Qtd", 10, y);
   doc.text("Item", 40, y);
-  doc.text("Subtotal", 130, y, { align: 'right' });
+  doc.text("Subtotal", 150, y, { align: 'right' });
   y += linhaAltura;
   doc.text('-------------------------------', 81, y, { align: 'center' }); y += linhaAltura;
 
-  // ===== Pedidos =====
+  // Pedidos
   mesaPedidos.forEach(p => {
     const qtd = Number(p.quantidade) || 0;
     const val = Number(p.valor) || 0;
@@ -475,7 +567,7 @@ function fecharMesaModal() {
     }
 
     doc.text(String(qtd), 10, y); // Qtd
-    doc.text(p.item.substring(0, 12), 40, y); // Nome do item
+    doc.text(p.item.substring(0, 12), 40, y); // Item
     doc.text(`R$${sub.toFixed(2)}`, 150, y, { align: 'right' }); // Subtotal
     y += linhaAltura;
 
@@ -487,132 +579,169 @@ function fecharMesaModal() {
     }
   });
 
-  // ===== Total =====
+  // Total
+  const total = mesaPedidos.reduce((acc, p) => acc + (Number(p.subtotal) || qtd * val), 0);
   doc.text('-------------------------------', 81, y, { align: 'center' }); y += linhaAltura;
   doc.setFontSize(12);
   doc.text(`TOTAL: R$${total.toFixed(2)}`, 150, y, { align: 'right' }); y += linhaAltura * 2;
 
-  // ===== Rodapé =====
+  // Rodapé
   doc.setFontSize(10);
-  doc.text('Obrigado pela preferência!', 81, y, { align: 'center' });
-  y += linhaAltura;
+  doc.text('Obrigado pela preferência!', 81, y, { align: 'center' }); y += linhaAltura;
   doc.text('Volte Sempre!', 81, y, { align: 'center' });
 
-  // Abre o PDF
+  // Abre PDF
   window.open(doc.output('bloburl'));
 
-  // ===== Histórico =====
-  let historico = JSON.parse(localStorage.getItem('historico')) || [];
-  mesaPedidos.forEach(p => { p.dataHora = dataHora; historico.push(p); });
-  localStorage.setItem('historico', JSON.stringify(historico));
-  let restantes = pedidos.filter(p => String(p.mesa) !== String(mesaAtual));
-  localStorage.setItem('pedidos', JSON.stringify(restantes));
-
+  // Atualiza frontend
   fecharModal();
-  renderMesas();
+  await renderMesas();
 }
 
+// ===== Histórico (backend) =====
+(async () => {
+  try {
+    // Salva no backend
+    await fetch("http://localhost:3000/historico", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mesa: mesaAtual, pedidos: mesaPedidos, dataHora })
+    });
+
+    // Deleta pedidos ativos no backend
+    for (const p of mesaPedidos) {
+      await fetch(`http://localhost:3000/pedidos/${p.id}`, { method: "DELETE" });
+    }
+
+    // Atualiza frontend
+    fecharModal();
+    await renderMesas();
+  } catch (err) {
+    console.error("Erro ao salvar histórico ou limpar pedidos:", err);
+    alert("❌ Ocorreu um erro ao salvar histórico no servidor.");
+  }
+})();
 
 
-// Histórico
-function mostrarHistorico() {
+// ===== Histórico =====
+async function mostrarHistorico() {
   const container = document.getElementById('historicoContainer');
-  const historico = JSON.parse(localStorage.getItem('historico')) || [];
-  if (historico.length === 0) { container.innerHTML = '<p>Nenhum histórico.</p>'; return; }
+  if (!container) return;
 
-  const mesas = {};
-  historico.forEach(p => {
-    const chave = `Mesa ${p.mesa} - ${p.dataHora}`;
-    if (!mesas[chave]) mesas[chave] = [];
-    mesas[chave].push(p);
-  });
+  try {
+    // Busca histórico do backend
+    const res = await fetch("http://localhost:3000/historico");
+    const historico = await res.json();
 
-  let html = '';
-  for (const chave in mesas) {
-    const pedidosMesa = mesas[chave];
-    html += `<div class="mesa"><h3>${chave}</h3><ul>`;
+    if (historico.length === 0) {
+      container.innerHTML = '<p>Nenhum histórico.</p>';
+      return;
+    }
+
+    const mesas = {};
+    historico.forEach(p => {
+      const chave = `Mesa ${p.mesa} - ${p.dataHora}`;
+      if (!mesas[chave]) mesas[chave] = [];
+      mesas[chave].push(p);
+    });
+
+    let html = '';
+    for (const chave in mesas) {
+      const pedidosMesa = mesas[chave];
+      html += `<div class="mesa"><h3>${chave}</h3><ul>`;
+      pedidosMesa.forEach(p => {
+        const qtd = Number(p.quantidade) || 0;
+        const val = Number(p.valor) || 0;
+        const sub = Number(p.subtotal) || qtd * val;
+        html += `<li>${qtd}x ${p.item || 'Item não informado'} - R$${val.toFixed(2)} = R$${sub.toFixed(2)}${p.obs ? ` (${p.obs})` : ''}</li>`;
+      });
+      const total = pedidosMesa.reduce((s, p) => s + (Number(p.subtotal) || (Number(p.quantidade) || 0) * (Number(p.valor) || 0)), 0);
+      html += `</ul>
+         <strong>Total: R$${total.toFixed(2)}</strong><br>
+         <button onclick="imprimirHistorico('${pedidosMesa[0].mesa}', '${pedidosMesa[0].dataHora}')">Imprimir</button>
+         </div>`;
+    }
+    container.innerHTML = html;
+  } catch (err) {
+    console.error("Erro ao carregar histórico:", err);
+    container.innerHTML = '<p>Falha ao carregar histórico do servidor.</p>';
+  }
+}
+
+// ===== Imprimir Histórico =====
+async function imprimirHistorico(mesa, dataHora) {
+  try {
+    const res = await fetch("http://localhost:3000/historico");
+    const historico = await res.json();
+    const pedidosMesa = historico.filter(p => String(p.mesa) === String(mesa) && p.dataHora === dataHora);
+    if (pedidosMesa.length === 0) return alert("Pedido não encontrado no histórico.");
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'pt',
+      format: [180, 600]
+    });
+
+    doc.setFont('Courier', 'normal');
+    let y = 20;
+    const total = pedidosMesa.reduce((acc, p) => acc + (Number(p.subtotal) || (Number(p.quantidade) || 0) * (Number(p.valor) || 0)), 0);
+    const linhaAltura = 15;
+
+    // Cabeçalho
+    doc.setFontSize(12);
+    doc.text('Cervejaria Mandela', 10, y); y += linhaAltura;
+    doc.text(`Mesa ${mesa}`, 10, y); y += linhaAltura;
+    doc.text(dataHora, 10, y); y += linhaAltura;
+    doc.text('----------------------------', 10, y); y += linhaAltura;
+
+    // Pedidos
     pedidosMesa.forEach(p => {
       const qtd = Number(p.quantidade) || 0;
       const val = Number(p.valor) || 0;
       const sub = Number(p.subtotal) || qtd * val;
-      html += `<li>${qtd}x ${p.item || 'Item não informado'} - R$${val.toFixed(2)} = R$${sub.toFixed(2)}${p.obs ? ` (${p.obs})` : ''}</li>`;
-    });
-    const total = pedidosMesa.reduce((s, p) => s + (Number(p.subtotal) || (Number(p.quantidade) || 0) * (Number(p.valor) || 0)), 0);
-    html += `</ul>
-       <strong>Total: R$${total.toFixed(2)}</strong><br>
-       <button onclick="imprimirHistorico('${pedidosMesa[0].mesa}', '${pedidosMesa[0].dataHora}')">Imprimir</button>
-       </div>`;
 
-  }
-  container.innerHTML = html;
-}
-
-
-function imprimirHistorico(mesa, dataHora) {
-  const historico = JSON.parse(localStorage.getItem('historico')) || [];
-  const pedidosMesa = historico.filter(p => String(p.mesa) === String(mesa) && p.dataHora === dataHora);
-  if (pedidosMesa.length === 0) return alert("Pedido não encontrado no histórico.");
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({
-    orientation: 'portrait',
-    unit: 'pt',
-    format: [180, 600] // largura/altura ajustada
-  });
-
-  doc.setFont('Courier', 'normal');
-  let y = 20;
-  const total = pedidosMesa.reduce((acc, p) => acc + (Number(p.subtotal) || (Number(p.quantidade) || 0) * (Number(p.valor) || 0)), 0);
-  const linhaAltura = 15;
-
-  // Cabeçalho
-  doc.setFontSize(12);
-  doc.text('Cervejaria Mandela', 10, y); y += linhaAltura;
-  doc.text(`Mesa ${mesa}`, 10, y); y += linhaAltura;
-  doc.text(dataHora, 10, y); y += linhaAltura;
-  doc.text('----------------------------', 10, y); y += linhaAltura;
-
-  // Pedidos
-  pedidosMesa.forEach(p => {
-    const qtd = Number(p.quantidade) || 0;
-    const val = Number(p.valor) || 0;
-    const sub = Number(p.subtotal) || qtd * val;
-
-    if (y + linhaAltura > doc.internal.pageSize.height) {
-      doc.addPage();
-      y = 20;
-    }
-
-    doc.text(`${qtd}x ${p.item.padEnd(12)} R$${sub.toFixed(2)}`, 10, y);
-    y += linhaAltura;
-
-    if (p.obs) {
       if (y + linhaAltura > doc.internal.pageSize.height) {
         doc.addPage();
         y = 20;
       }
-      doc.setFontSize(10);
-      doc.text(`Obs: ${p.obs}`, 10, y);
-      y += 12;
-      doc.setFontSize(12);
-    }
-  });
 
-  if (y + linhaAltura > doc.internal.pageSize.height) doc.addPage();
-  doc.text('----------------------------', 10, y); y += linhaAltura;
-  doc.setFontSize(14);
-  doc.text(`TOTAL: R$${total.toFixed(2)}`, 10, y); y += 20;
-  doc.setFontSize(12);
-  doc.text('Obrigado!', 10, y);
+      doc.text(`${qtd}x ${p.item.padEnd(12)} R$${sub.toFixed(2)}`, 10, y);
+      y += linhaAltura;
 
-  // Abre PDF
-  window.open(doc.output('bloburl'));
+      if (p.obs) {
+        if (y + linhaAltura > doc.internal.pageSize.height) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.setFontSize(10);
+        doc.text(`Obs: ${p.obs}`, 10, y);
+        y += 12;
+        doc.setFontSize(12);
+      }
+    });
+
+    if (y + linhaAltura > doc.internal.pageSize.height) doc.addPage();
+    doc.text('----------------------------', 10, y); y += linhaAltura;
+    doc.setFontSize(14);
+    doc.text(`TOTAL: R$${total.toFixed(2)}`, 10, y); y += 20;
+    doc.setFontSize(12);
+    doc.text('Obrigado!', 10, y);
+
+    window.open(doc.output('bloburl'));
+  } catch (err) {
+    console.error("Erro ao gerar PDF do histórico:", err);
+    alert("❌ Falha ao gerar PDF do histórico.");
+  }
 }
 
-// Inicializa
-window.addEventListener('DOMContentLoaded', renderMesas);
-
+// Inicializa histórico
+window.addEventListener('DOMContentLoaded', () => {
+  renderMesas();
+  mostrarHistorico();
+});
 
 if (document.getElementById("mesasContainer")) {
-  renderCaixa()
+  renderCaixa();
 }
+
