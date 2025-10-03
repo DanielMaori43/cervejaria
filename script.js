@@ -39,7 +39,7 @@ if (document.getElementById("loginForm")) {
 
     // ===== Caso admin ou outros usuários precisem de senha =====
     try {
-      const response = await fetch("http://localhost:3000/usuarios");
+      const response = await fetch("https://cervejaria-sk59.onrender.com/usuarios");
       const usuarios = await response.json();
       const user = usuarios.find(
         (u) => u.usuario === usuario && u.senha === senha && u.tipo === tipo
@@ -79,7 +79,7 @@ async function cadastrarUsuario() { // <<< async aqui
   }
 
   try {
-    await fetch("http://localhost:3000/usuarios", {
+    await fetch("https://cervejaria-sk59.onrender.com/usuarios", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ usuario: novoUsuario, senha: novaSenha, tipo: novoTipo })
@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===== BUSCA USUÁRIOS DO BANCO =====
   let usuarios = []
   try {
-    const response = await fetch("http://localhost:3000/usuarios")
+    const response = await fetch("https://cervejaria-sk59.onrender.com/usuarios")
     usuarios = await response.json()
   } catch (err) {
     console.error("Erro ao buscar usuários:", err)
@@ -244,7 +244,7 @@ async function renderMesa(numeroMesa) {
 
   try {
     // Busca todos os pedidos do servidor
-    const response = await fetch("http://localhost:3000/pedidos");
+    const response = await fetch("https://cervejaria-sk59.onrender.com/pedidos");
     if (!response.ok) throw new Error("Erro ao buscar pedidos do servidor");
     const pedidos = await response.json();
 
@@ -295,7 +295,7 @@ if (formPedido) {
     const pedido = { mesa, item, quantidade, valor, subtotal, obs } // status removido
 
     try {
-      const response = await fetch("http://localhost:3000/pedidos", {
+      const response = await fetch("https://cervejaria-sk59.onrender.com/pedidos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pedido)
@@ -324,7 +324,7 @@ async function renderCaixa() {
   // Pega os pedidos do backend
   let pedidos = []
   try {
-    const res = await fetch("http://localhost:3000/pedidos")
+    const res = await fetch("https://cervejaria-sk59.onrender.com/pedidos")
     pedidos = await res.json()
   } catch (err) {
     console.error("Erro ao buscar pedidos:", err)
@@ -351,16 +351,16 @@ async function renderCaixa() {
       <h3>Mesa ${mesa}</h3>
       <ul>
         ${mesas[mesa].itens
-          .map(
-            (i) => `
+        .map(
+          (i) => `
           <li>
             ${i.item} ${i.quantidade}x - R$${i.valor}
             = <strong>R$${i.subtotal.toFixed(2)}</strong>
             ${i.obs ? `<em>(${i.obs})</em>` : ""}
           </li>
         `,
-          )
-          .join("")}
+        )
+        .join("")}
       </ul>
       <p><strong>Total: R$${mesas[mesa].total.toFixed(2)}</strong></p>
     `
@@ -374,7 +374,7 @@ let mesaAtual = null
 // ===== API helper =====
 async function getPedidos() {
   try {
-    const res = await fetch("http://localhost:3000/pedidos");
+    const res = await fetch("https://cervejaria-sk59.onrender.com/pedidos");
     return await res.json();
   } catch (err) {
     console.error("Erro ao buscar pedidos:", err);
@@ -384,7 +384,7 @@ async function getPedidos() {
 
 async function deletePedido(id) {
   try {
-    await fetch(`http://localhost:3000/pedidos/${id}`, { method: 'DELETE' });
+    await fetch(`https://cervejaria-sk59.onrender.com/pedidos/${id}`, { method: 'DELETE' });
   } catch (err) {
     console.error("Erro ao deletar pedido:", err);
   }
@@ -392,7 +392,7 @@ async function deletePedido(id) {
 
 async function salvarHistorico(mesa, pedidos) {
   try {
-    await fetch("http://localhost:3000/historico", {
+    await fetch("https://cervejaria-sk59.onrender.com/historico", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mesa, pedidos, dataHora: new Date().toISOString() })
@@ -506,14 +506,14 @@ async function fecharMesaModal() {
 
   // ===== Salva histórico no backend =====
   try {
-    await fetch("http://localhost:3000/historico", {
+    await fetch("https://cervejaria-sk59.onrender.com/historico", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mesa: mesaAtual, pedidos: mesaPedidos, dataHora })
     });
   } catch (err) {
     console.error("Erro ao salvar histórico:", err);
-    alert("❌ Ocorreu um erro ao salvar histórico no servidor.");
+
     return;
   }
 
@@ -602,7 +602,7 @@ async function fecharMesaModal() {
 (async () => {
   try {
     // Salva no backend
-    await fetch("http://localhost:3000/historico", {
+    await fetch("https://cervejaria-sk59.onrender.com/historico", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mesa: mesaAtual, pedidos: mesaPedidos, dataHora })
@@ -610,7 +610,7 @@ async function fecharMesaModal() {
 
     // Deleta pedidos ativos no backend
     for (const p of mesaPedidos) {
-      await fetch(`http://localhost:3000/pedidos/${p.id}`, { method: "DELETE" });
+      await fetch(`https://cervejaria-sk59.onrender.com/pedidos/${p.id}`, { method: "DELETE" });
     }
 
     // Atualiza frontend
@@ -618,7 +618,7 @@ async function fecharMesaModal() {
     await renderMesas();
   } catch (err) {
     console.error("Erro ao salvar histórico ou limpar pedidos:", err);
-    alert("❌ Ocorreu um erro ao salvar histórico no servidor.");
+    
   }
 })();
 
@@ -630,7 +630,7 @@ async function mostrarHistorico() {
 
   try {
     // Busca histórico do backend
-    const res = await fetch("http://localhost:3000/historico");
+    const res = await fetch("https://cervejaria-sk59.onrender.com/historico");
     const historico = await res.json();
 
     if (historico.length === 0) {
@@ -671,7 +671,7 @@ async function mostrarHistorico() {
 // ===== Imprimir Histórico =====
 async function imprimirHistorico(mesa, dataHora) {
   try {
-    const res = await fetch("http://localhost:3000/historico");
+    const res = await fetch("https://cervejaria-sk59.onrender.com/historico");
     const historico = await res.json();
     const pedidosMesa = historico.filter(p => String(p.mesa) === String(mesa) && p.dataHora === dataHora);
     if (pedidosMesa.length === 0) return alert("Pedido não encontrado no histórico.");
