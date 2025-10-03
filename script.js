@@ -524,6 +524,7 @@ async function fecharMesaModal() {
       console.error("Erro ao deletar pedido:", err);
     }
   }
+  
 
   // ===== Gera PDF =====
   const { jsPDF } = window.jspdf;
@@ -603,12 +604,6 @@ async function fecharMesaModal() {
   await renderMesas();
 }
 
-
-   async function deletarPedidosAtivos(mesaPedidos) {
-  for (const p of mesaPedidos) {
-    await fetch(`https://cervejaria-sk59.onrender.com/pedidos/${p.id}`, { method: "DELETE" });
-  }
-}
 
 
 
@@ -761,6 +756,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
 
