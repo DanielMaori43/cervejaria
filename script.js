@@ -638,9 +638,10 @@ async function mostrarHistorico() {
       return;
     }
 
+    // Agrupa por mesa + dataHora
     const mesas = {};
     historico.forEach(p => {
-      const chave = `Mesa ${p.mesa} - ${p.dataHora}`;
+      const chave = `Mesa ${p.mesa} - ${p.dataHora}`; // usa ISO string para garantir match
       if (!mesas[chave]) mesas[chave] = [];
       mesas[chave].push(p);
     });
@@ -648,7 +649,13 @@ async function mostrarHistorico() {
     let html = '';
     for (const chave in mesas) {
       const pedidosMesa = mesas[chave];
-      html += `<div class="mesa"><h3>${chave}</h3><ul>`;
+
+      // Formata data para exibição
+      const dataExibicao = new Date(pedidosMesa[0].dataHora).toLocaleString();
+
+      html += `<div class="mesa">
+        <h3>Mesa ${pedidosMesa[0].mesa} - ${dataExibicao}</h3>
+        <ul>`;
       pedidosMesa.forEach(p => {
         const qtd = Number(p.quantidade) || 0;
         const val = Number(p.valor) || 0;
@@ -656,11 +663,14 @@ async function mostrarHistorico() {
         html += `<li>${qtd}x ${p.item || 'Item não informado'} - R$${val.toFixed(2)} = R$${sub.toFixed(2)}${p.obs ? ` (${p.obs})` : ''}</li>`;
       });
       const total = pedidosMesa.reduce((s, p) => s + (Number(p.subtotal) || (Number(p.quantidade) || 0) * (Number(p.valor) || 0)), 0);
+
+      // Botão envia exatamente a ISO string para a função imprimirHistorico
       html += `</ul>
-         <strong>Total: R$${total.toFixed(2)}</strong><br>
-         <button onclick="imprimirHistorico('${pedidosMesa[0].mesa}', '${pedidosMesa[0].dataHora}')">Imprimir</button>
-         </div>`;
+        <strong>Total: R$${total.toFixed(2)}</strong><br>
+        <button onclick="imprimirHistorico('${pedidosMesa[0].mesa}', '${pedidosMesa[0].dataHora}')">Imprimir</button>
+      </div>`;
     }
+
     container.innerHTML = html;
   } catch (err) {
     console.error("Erro ao carregar histórico:", err);
@@ -673,7 +683,9 @@ async function imprimirHistorico(mesa, dataHora) {
   try {
     const res = await fetch("https://cervejaria-sk59.onrender.com/historico");
     const historico = await res.json();
-    const pedidosMesa = historico.filter(p => String(p.mesa) === String(mesa) && p.dataHora === dataHora);
+
+    // Filtro pelo mesmo valor ISO string
+    const pedidosMesa = historico.filter(p => String(p.mesa) === String(mesa) && String(p.dataHora) === String(dataHora));
     if (pedidosMesa.length === 0) return alert("Pedido não encontrado no histórico.");
 
     const { jsPDF } = window.jspdf;
@@ -685,14 +697,13 @@ async function imprimirHistorico(mesa, dataHora) {
 
     doc.setFont('Courier', 'normal');
     let y = 20;
-    const total = pedidosMesa.reduce((acc, p) => acc + (Number(p.subtotal) || (Number(p.quantidade) || 0) * (Number(p.valor) || 0)), 0);
     const linhaAltura = 15;
 
     // Cabeçalho
     doc.setFontSize(12);
     doc.text('Cervejaria Mandela', 10, y); y += linhaAltura;
     doc.text(`Mesa ${mesa}`, 10, y); y += linhaAltura;
-    doc.text(dataHora, 10, y); y += linhaAltura;
+    doc.text(new Date(dataHora).toLocaleString(), 10, y); y += linhaAltura;
     doc.text('----------------------------', 10, y); y += linhaAltura;
 
     // Pedidos
@@ -721,6 +732,8 @@ async function imprimirHistorico(mesa, dataHora) {
       }
     });
 
+    // Total
+    const total = pedidosMesa.reduce((acc, p) => acc + (Number(p.subtotal) || (Number(p.quantidade) || 0) * (Number(p.valor) || 0)), 0);
     if (y + linhaAltura > doc.internal.pageSize.height) doc.addPage();
     doc.text('----------------------------', 10, y); y += linhaAltura;
     doc.setFontSize(14);
@@ -741,7 +754,4 @@ window.addEventListener('DOMContentLoaded', () => {
   mostrarHistorico();
 });
 
-if (document.getElementById("mesasContainer")) {
-  renderCaixa();
-}
 
