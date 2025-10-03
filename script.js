@@ -604,16 +604,6 @@ async function fecharMesaModal() {
 }
 
 
-// ===== Histórico (backend) =====
-(async () => {
-  try {
-    // Salva no backend
-    await fetch("https://cervejaria-sk59.onrender.com/historico", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mesa: mesaAtual, pedidos: mesaPedidos, dataHora })
-    });
-
     // Deleta pedidos ativos no backend
     for (const p of mesaPedidos) {
       await fetch(`https://cervejaria-sk59.onrender.com/pedidos/${p.id}`, { method: "DELETE" });
@@ -768,6 +758,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
 
