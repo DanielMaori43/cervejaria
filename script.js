@@ -606,15 +606,15 @@ async function fecharMesaModal() {
 
 
 // ===== Histórico =====
-async function mostrarHistorico() {
-  const container = document.getElementById("historicoContainer");
-  if (!container) return;
+// async function mostrarHistorico() {
+//   const container = document.getElementById("historicoContainer");
+//   if (!container) return;
 
-  if (container.style.display === "block") {
-    // Esconde se já estiver visível
-    container.style.display = "none";
-    return;
-  }
+//   if (container.style.display === "block") {
+//     // Esconde se já estiver visível
+//     container.style.display = "none";
+//     return;
+//   }
 
   // Mostra o container
   container.style.display = "block";
@@ -754,22 +754,23 @@ async function imprimirHistorico(mesa, dataHora) {
     alert("❌ Falha ao gerar PDF do histórico.");
   }
 }
-function mostrarHistorico() {
-  const container = document.getElementById("historicoContainer");
-  if (container.style.display === "none") {
-    container.style.display = "block";
-    carregarHistorico(); // sua função existente para buscar histórico
-  } else {
-    container.style.display = "none";
-  }
-}
+// function mostrarHistorico() {
+//   const container = document.getElementById("historicoContainer");
+//   if (container.style.display === "none") {
+//     container.style.display = "block";
+//     carregarHistorico(); // sua função existente para buscar histórico
+//   } else {
+//     container.style.display = "none";
+//   }
+// }
 
 
 // Inicializa histórico
 window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
-  mostrarHistorico();
+  // mostrarHistorico();
 });
+
 
 
 
