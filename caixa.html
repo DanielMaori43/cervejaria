@@ -13,22 +13,22 @@
 <body>
   <header class="topo">
     <img src="logo do bar 1.jpg" alt="Logo Cervejaria e Petiscaria Mandela" class="logo-principal">
-
   </header>
 
   <div class="containermesa">
     <nav class="garçom">
       <button onclick="window.location.href='index.html'">Caixa</button>
     </nav>
-
-    
   </div>
+
   <h1>Caixa Profissional</h1>
 
   <div class="mesas-grid" id="mesasContainer"></div>
 
+  <!-- Botão para histórico -->
   <button class="historico-btn" onclick="mostrarHistorico()">Ver Histórico</button>
-  <div id="historicoContainer"></div>
+  <!-- Histórico começa escondido -->
+  <div id="historicoContainer" style="display: none;"></div>
 
   <!-- Modal de pedidos -->
   <div id="modalOverlay" class="modal-overlay">
@@ -40,12 +40,8 @@
       <button onclick="fecharModal()">Fechar</button>
     </div>
   </div>
-    <footer class="rodape">
-    <img src="mandelanovo.png" alt="Logo Mandela pequeno">
-  </footer>
+
   <script src="script.js"></script>
 </body>
 
 </html>
-
-
