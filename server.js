@@ -103,7 +103,9 @@ app.get("/historico", async (req, res) => {
 });
 
 app.post("/historico", async (req, res) => {
-    const { mesa, pedidos, dataHora } = req.body;
+    const { mesa, pedidos } = req.body;
+    const dataHora = new Date().toISOString(); // 🔥 backend sempre gera a data válida
+
     try {
         for (const p of pedidos) {
             await pool.query(
@@ -124,4 +126,5 @@ app.post("/historico", async (req, res) => {
 app.listen(3000, () => {
     console.log("API rodando em http://localhost:3000");
 });
+
 
