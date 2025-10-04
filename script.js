@@ -623,7 +623,8 @@ async function mostrarHistorico() {
     // Agrupa por mesa + dataHora
     const mesas = {};
     historico.forEach(p => {
-      const chave = `Mesa ${p.mesa} - ${p.dataHora}`; // usa ISO string para garantir match
+      const chave = `Mesa ${p.mesa} - ${p.datahora}`;
+ // usa ISO string para garantir match
       if (!mesas[chave]) mesas[chave] = [];
       mesas[chave].push(p);
     });
@@ -633,7 +634,10 @@ async function mostrarHistorico() {
       const pedidosMesa = mesas[chave];
 
       // Formata data para exibição
-      const dataExibicao = new Date(pedidosMesa[0].dataHora).toLocaleString();
+      const dataExibicao = new Date(pedidosMesa[0].datahora).toLocaleString("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short"
+      });
 
       html += `<div class="mesa">
         <h3>Mesa ${pedidosMesa[0].mesa} - ${dataExibicao}</h3>
@@ -649,7 +653,8 @@ async function mostrarHistorico() {
       // Botão envia exatamente a ISO string para a função imprimirHistorico
       html += `</ul>
         <strong>Total: R$${total.toFixed(2)}</strong><br>
-        <button onclick="imprimirHistorico('${pedidosMesa[0].mesa}', '${pedidosMesa[0].dataHora}')">Imprimir</button>
+        <button onclick="imprimirHistorico('${pedidosMesa[0].mesa}', '${pedidosMesa[0].datahora}')">Imprimir</button>
+
       </div>`;
     }
 
@@ -668,7 +673,8 @@ async function imprimirHistorico(mesa, dataHora) {
 
     // Filtra pelo mesmo valor ISO string (sem milissegundos)
     const pedidosMesa = historico.filter(
-      p => String(p.mesa) === String(mesa) && p.dataHora.slice(0,19) === dataHora.slice(0,19)
+     p => String(p.mesa) === String(mesa) && p.datahora.slice(0,19) === dataHora.slice(0,19)
+
     );
 
     if (pedidosMesa.length === 0) return alert("Pedido não encontrado no histórico.");
@@ -688,7 +694,11 @@ async function imprimirHistorico(mesa, dataHora) {
     doc.setFontSize(12);
     doc.text('Cervejaria Mandela', 10, y); y += linhaAltura;
     doc.text(`Mesa ${mesa}`, 10, y); y += linhaAltura;
-    doc.text(new Date(dataHora).toLocaleString(), 10, y); y += linhaAltura;
+    doc.text(new Date(dataHora).toLocaleString("pt-BR", {
+  dateStyle: "short",
+  timeStyle: "short"
+}), 10, y);
+ y += linhaAltura;
     doc.text('----------------------------', 10, y); y += linhaAltura;
 
     // Pedidos
@@ -744,6 +754,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
 
