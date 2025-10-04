@@ -605,16 +605,16 @@ async function fecharMesaModal() {
 
 
 
-// ===== Histórico =====
-// async function mostrarHistorico() {
-//   const container = document.getElementById("historicoContainer");
-//   if (!container) return;
+/ ===== Histórico =====
+/ async function mostrarHistorico() {
+   const container = document.getElementById("historicoContainer");
+   if (!container) return;
 
-//   if (container.style.display === "block") {
-//     // Esconde se já estiver visível
-//     container.style.display = "none";
-//     return;
-//   }
+  if (container.style.display === "block") {
+     // Esconde se já estiver visível
+     container.style.display = "none";
+     return;
+   }
 
   // Mostra o container
   container.style.display = "block";
