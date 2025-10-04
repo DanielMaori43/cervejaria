@@ -748,12 +748,23 @@ async function imprimirHistorico(mesa, dataHora) {
     alert("❌ Falha ao gerar PDF do histórico.");
   }
 }
+function mostrarHistorico() {
+  const container = document.getElementById("historicoContainer");
+  if (container.style.display === "none") {
+    container.style.display = "block";
+    carregarHistorico(); // sua função existente para buscar histórico
+  } else {
+    container.style.display = "none";
+  }
+}
+
 
 // Inicializa histórico
 window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
 
