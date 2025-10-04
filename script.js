@@ -607,8 +607,17 @@ async function fecharMesaModal() {
 
 // ===== Histórico =====
 async function mostrarHistorico() {
-  const container = document.getElementById('historicoContainer');
+  const container = document.getElementById("historicoContainer");
   if (!container) return;
+
+  if (container.style.display === "block") {
+    // Esconde se já estiver visível
+    container.style.display = "none";
+    return;
+  }
+
+  // Mostra o container
+  container.style.display = "block";
 
   try {
     // Busca histórico do backend
@@ -624,7 +633,6 @@ async function mostrarHistorico() {
     const mesas = {};
     historico.forEach(p => {
       const chave = `Mesa ${p.mesa} - ${p.datahora}`;
- // usa ISO string para garantir match
       if (!mesas[chave]) mesas[chave] = [];
       mesas[chave].push(p);
     });
@@ -635,8 +643,8 @@ async function mostrarHistorico() {
 
       // Formata data para exibição
       const dataExibicao = new Date(pedidosMesa[0].datahora).toLocaleString("pt-BR", {
-      dateStyle: "short",
-      timeStyle: "short"
+        dateStyle: "short",
+        timeStyle: "short"
       });
 
       html += `<div class="mesa">
@@ -650,11 +658,9 @@ async function mostrarHistorico() {
       });
       const total = pedidosMesa.reduce((s, p) => s + (Number(p.subtotal) || (Number(p.quantidade) || 0) * (Number(p.valor) || 0)), 0);
 
-      // Botão envia exatamente a ISO string para a função imprimirHistorico
       html += `</ul>
         <strong>Total: R$${total.toFixed(2)}</strong><br>
         <button onclick="imprimirHistorico('${pedidosMesa[0].mesa}', '${pedidosMesa[0].datahora}')">Imprimir</button>
-
       </div>`;
     }
 
@@ -764,6 +770,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   mostrarHistorico();
 });
+
 
 
 
