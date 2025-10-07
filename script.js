@@ -517,13 +517,11 @@ async function fecharMesaModal() {
   }
 
   // ===== Deleta pedidos ativos no backend =====
- try {
-  await Promise.all(mesaPedidos.map(p => deletePedido(p.id)));
-} catch (err) {
-  console.error("Erro ao deletar pedidos:", err);
-}
-
-  
+  try {
+    await Promise.all(mesaPedidos.map(p => deletePedido(p.id)));
+  } catch (err) {
+    console.error("Erro ao deletar pedidos:", err);
+  }
 
   // ===== Gera PDF =====
   const { jsPDF } = window.jspdf;
@@ -603,18 +601,16 @@ async function fecharMesaModal() {
   await renderMesas();
 }
 
-
-
-/ ===== Histórico =====
-  async function mostrarHistorico() {
-   const container = document.getElementById("historicoContainer");
-   if (!container) return;
+// ===== Histórico =====
+async function mostrarHistorico() {
+  const container = document.getElementById("historicoContainer");
+  if (!container) return;
 
   if (container.style.display === "block") {
-     // Esconde se já estiver visível
-     container.style.display = "none";
-     return;
-   }
+    // Esconde se já estiver visível
+    container.style.display = "none";
+    return;
+  }
 
   // Mostra o container
   container.style.display = "block";
@@ -679,8 +675,7 @@ async function imprimirHistorico(mesa, dataHora) {
 
     // Filtra pelo mesmo valor ISO string (sem milissegundos)
     const pedidosMesa = historico.filter(
-     p => String(p.mesa) === String(mesa) && p.datahora.slice(0,19) === dataHora.slice(0,19)
-
+      p => String(p.mesa) === String(mesa) && p.datahora.slice(0,19) === dataHora.slice(0,19)
     );
 
     if (pedidosMesa.length === 0) return alert("Pedido não encontrado no histórico.");
@@ -701,10 +696,10 @@ async function imprimirHistorico(mesa, dataHora) {
     doc.text('Cervejaria Mandela', 10, y); y += linhaAltura;
     doc.text(`Mesa ${mesa}`, 10, y); y += linhaAltura;
     doc.text(new Date(dataHora).toLocaleString("pt-BR", {
-  dateStyle: "short",
-  timeStyle: "short"
-}), 10, y);
- y += linhaAltura;
+      dateStyle: "short",
+      timeStyle: "short"
+    }), 10, y);
+    y += linhaAltura;
     doc.text('----------------------------', 10, y); y += linhaAltura;
 
     // Pedidos
@@ -754,23 +749,12 @@ async function imprimirHistorico(mesa, dataHora) {
     alert("❌ Falha ao gerar PDF do histórico.");
   }
 }
- function mostrarHistorico() {
-   const container = document.getElementById("historicoContainer");
-   if (container.style.display === "none") {
-    container.style.display = "block";
-    carregarHistorico(); // sua função existente para buscar histórico
-  } else {
-     container.style.display = "none";
-   }
- }
-
 
 // Inicializa histórico
 window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   // mostrarHistorico();
 });
-
 
 
 
