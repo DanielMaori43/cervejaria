@@ -606,7 +606,7 @@ async function fecharMesaModal() {
 
 
 / ===== Histórico =====
-/ async function mostrarHistorico() {
+  async function mostrarHistorico() {
    const container = document.getElementById("historicoContainer");
    if (!container) return;
 
@@ -770,6 +770,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderMesas();
   // mostrarHistorico();
 });
+
 
 
 
