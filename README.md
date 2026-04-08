@@ -1,46 +1,68 @@
-# 🍺 Sistema de Gerenciamento de Cervejaria
+# 🍺 Sistema de Cervejaria (Full Stack)
 
-Sistema Full Stack desenvolvido para gerenciamento de pedidos, usuários e operações de uma cervejaria.
+Sistema completo para gerenciamento de pedidos, usuários e operações de uma cervejaria, com integração entre frontend, backend e banco de dados na nuvem.
 
-## 🚀 Funcionalidades
+---
 
-* 🔐 Sistema de login e autenticação
+## 🚀 Demonstração
+
+🔗 Acesse o sistema online:
+https://danielmaori43.github.io/cervejaria/
+
+---
+
+## 🧠 Sobre o projeto
+
+Este sistema foi desenvolvido com foco em simular um ambiente real de aplicação, incluindo autenticação de usuários, persistência de dados e organização de rotinas de negócio.
+
+---
+
+## ⚙️ Funcionalidades
+
+* 🔐 Login e autenticação de usuários
 * 👤 Cadastro e gerenciamento de usuários
 * 📦 Controle de pedidos
-* 🧾 Registro em banco de dados na nuvem (Neon)
-* 🌐 Interface web responsiva
-* 🔄 Integração com API (backend próprio)
+* 🧾 Integração com banco de dados (Neon)
+* 🌐 Interface responsiva
+* 🔄 Backend com API própria
+
+---
 
 ## 🛠️ Tecnologias utilizadas
 
-* Frontend: HTML, CSS, JavaScript
-* Backend: Node.js
-* Banco de Dados: PostgreSQL (Neon)
-* Versionamento: Git e GitHub
+* HTML, CSS, JavaScript
+* Node.js
+* PostgreSQL (Neon)
+* Git e GitHub
 
-## 📂 Estrutura do projeto
+---
+
+## 📂 Estrutura
 
 frontend/
 backend/
 database/
 
-## ⚙️ Como executar o projeto
+---
 
+## ▶️ Como rodar o projeto
+
+```bash
 git clone https://github.com/danielmaori43/cervejaria
 cd cervejaria
 npm install
 node server.js
+```
 
-## 🌍 Acesso ao sistema
-
-Versão online:
-https://danielmaori43.github.io/cervejaria/
+---
 
 ## 👨‍💻 Autor
 
 Daniel Antônio
-https://github.com/danielmaori43
+🔗 https://github.com/danielmaori43
 
-## 📌 Observações
+---
 
-Este projeto foi desenvolvido com foco em prática profissional de desenvolvimento Full Stack, incluindo integração com banco de dados real e autenticação de usuários.
+## 📌 Observação
+
+Projeto desenvolvido com foco em evolução profissional como Desenvolvedor Full Stack.
